@@ -1,0 +1,234 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<div class="card shadow m-4">
+  <!-- Card Header - Dropdown -->
+  <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+    <h6 class="m-0 font-weight-bold text-primary">Listado de Productos</h6>
+    <div>
+      <a class="btn bg-gradient-success text-gray-100" href="{% url 'inv:producto_new' %}"><i class="fa fa-plus" aria-hidden="true"></i> Nuevo producto</a>
+      <button class="btn bg-gradient-info text-gray-100" data-toggle="modal" data-target="#uploadModal"><i class="fa fa-upload" aria-hidden="true"></i> Cargar desde Excel</button>
+    </div>
+  </div>
+  <!-- Card Body -->
+  <div class="card-body">
+    {% if not obj %}
+    <div class="alert alert-warning text-center">No Hay productos cargados</div>
+    {% else %}
+    <div class="table-responsive">
+      <table class="table table-striped dt-responsive table-sm nowrap">
+        <thead class="small">
+          <tr>
+            <th class="text-center">Cod. Int</th>
+            <th class="text-center">Nombre/Desc.</th>
+            <th class="text-center">Subcat.</th>
+            <th class="text-center">P. venta</th>
+            <th class="text-center">Stock</th>
+            <th class="text-center">Marca</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="small text-gray-900">
+          {% for item in obj %}
+          <tr {% if item.estado %} class="bg-success-own" {% else %} class="bg-warning-own" {% endif %}>
+            <td>{{ item.codigo }}</td>
+            <td>{{ item.descripcion|truncatechars:15 }}</td>
+            <td>{{ item.subcategoria|truncatechars:17 }}</td>
+            <td>{{ item.precio_venta }}</td>
+            <td>{{ item.existencia }}</td>
+            <td>{{ item.marca }}</td>
+            <td>
+              <a href="{% url 'inv:producto_edit' item.id %}" class="btn bg-gradient-info text-gray-100 btn-sm m-1" role="button">Editar</a>
+              <form action="{% url 'inv:producto_inactivar' item.id %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                {% if item.estado %}
+                <button type="submit" class="btn bg-gradient-warning btn-sm text-gray-100 m-1">Inactivar</button>
+                {% else %}
+                <button type="submit" class="btn bg-gradient-success btn-sm  text-gray-100 m-1">Activar</button>
+                {% endif %}
+              </form>
+              <a href="{% url 'inv:precio_new' item.id %}" class="btn bg-gradient-success btn-sm  text-gray-100 m-1">Agregar precio</a>
+              <button class="btn bg-gradient-info text-gray-100 btn-sm m-1" role="button" data-toggle="modal" data-target="#detalleProductoModal{{ forloop.counter }}">
+                Detalles
+              </button>
+              <div class="modal fade" id="detalleProductoModal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="detalleProductoModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content border-left-info">
+                    <div class="modal-header bg-info-own">
+                      <h5 class="modal-title" id="detalleFacturaModalLabel">Detalles del producto: {{item.descripcion}}</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="row">
+                        <div class="col">
+                          <ul class="list-group">
+                            <li class="list-group-item"><span class="font-weight-bold">Cód. interno N°: </span>{{item.codigo}}</li>
+                            <li class="list-group-item"><span class="font-weight-bold">Cód. Barras: </span>{{item.codigo_barra}}</li>
+                            <li class="list-group-item"><span class="font-weight-bold">Marca: </span>{{item.marca}}</li>
+                            <li class="list-group-item"><span class="font-weight-bold">Stock:</span>
+                              <span {% if item.existencia < 0 %} class="text-danger" {% else %} class="text-success" {% endif %}>{{item.existencia}}</span>
+                            </li>
+                          </ul>
+                        </div>
+                        <div class="col">
+                          <ul class="list-group">
+                            <li class="list-group-item"><span class="font-weight-bold">Precio venta: </span>${{item.precio_venta}}/{{item.unidad_medida}}</li>
+                            <li class="list-group-item"><span class="font-weight-bold">Unidad de medida: </span>{{item.unidad_medida}}</li>
+                            <li class="list-group-item"><span class="font-weight-bold">Clasificación: </span>{{item.subcategoria}}</li>
+                            <li class="list-group-item"><span class="font-weight-bold">Fecha de última compra: </span>{{item.ultima_compra|date:"d/m/y"}}</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <ul class="list-group mt-4">
+                        <div class="list-group-item"><span class="font-weight-bold">Creado por: </span>{{item.usuario_creador}}</div>
+                        <div class="list-group-item"><span class="font-weight-bold">Modificado por: </span>{% if item.usuario_modifica_nombre %} {{ item.usuario_modifica_nombre }} - {{item.fecha_modificacion|date:"d/m/y"}}{% else %}No se ha modificado.{% endif %}</div>
+                        <div {% if item.estado %} class="bg-success-own list-group-item" {% else %} class="bg-warning-own list-group-item" {% endif %}><span class="font-weight-bold">Estado: </span>{{ item.estado|yesno:"Activo,Inactivo" }}</div>
+                      </ul>
+                      <div class="container d-flex flex-row modal-lg"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal para carga de archivo Excel -->
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-left-success shadow h-100">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadModalLabel">Cargar productos desde archivo Excel</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="upload_products" action="{% url 'inv:excel_upload' %}" method="post" enctype="multipart/form-data" data-form-selector="#upload_products" data-form-url="{% url 'inv:producto_list' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="file">Seleccionar archivo Excel</label>
+            <input type="file" class="form-control-file" id="file" name="file" required>
+          </div>
+          <!-- div para mostrar los errores -->
+          <div id="file-upload-errors" class="alert alert-danger" style="display: none;"></div>
+          <button type="submit" class="btn bg-gradient-info text-gray-100"><i class="fa fa-upload" aria-hidden="true"></i> Subir archivo</button>
+        </form>
+      </div>
+      <div class="modal-footer row">
+        <div class="col">
+          <small>La planilla contiene información y parámetros para poder hacer carga masiva de productos.</small>
+        </div>
+        <div class="col">
+          <a href="{% static 'base/files/planillas-base/planilla_excel_carga_productos.xlsx' %}" download="planilla_excel.xlsx" class="btn bg-gradient-info text-gray-100"><i class="fa fa-download" aria-hidden="true"></i> Descargar planilla</a>
+        </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for details -->
+<div class="modal fade" id="detalleModal" tabindex="-1" role="dialog" aria-labelledby="detalleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="detalleModalLabel">Detalles de la carga</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div id="file-upload-success" class="alert alert-success" style="display:none;"></div>
+              <div id="file-upload-details" class="alert alert-info" style="display:none;"></div>
+              <div id="file-upload-errors" class="alert alert-danger" style="display:none;"></div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js_page %}
+<script>
+  $(document).ready(function(){
+    $('#dropdownMenuLink').click(function(){
+        $('#detalleProductoModal').modal('show');
+    });
+});
+</script>
+
+
+
+<script>
+  $(document).ready(function () {
+      $('#upload_products').submit(function (e) {
+          e.preventDefault();
+          var formData = new FormData($(this)[0]);
+          $.ajax({
+              type: 'POST',
+              url: $(this).attr('action'),
+              data: formData,
+              contentType: false,
+              processData: false,
+              success: function (data) {
+                  if (data.success) {
+                      $('#uploadModal').modal('hide')
+                      $('#detalleModal').modal('show');
+
+                      // Show success message and details in the modal
+                      $('#file-upload-success').html(data.message);
+                      $('#file-upload-details').html(data.data.detalles_productos.join('<br>'));
+                      $('#file-upload-success').show();
+                      $('#file-upload-details').show();
+                      $('#file-upload-errors').hide(); // Hide errors
+                  } else {
+                      if (data.file_message) {
+                          $('#file-upload-errors').html(data.file_message);
+                      } else {
+                          var errors = JSON.parse(data.message);
+                          var errorMessages = [];
+                          for (var field in errors) {
+                              if (errors.hasOwnProperty(field)) {
+                                  errors[field].forEach(function (error) {
+                                      errorMessages.push(error.message);
+                                  });
+                              }
+                          }
+                          console.log('Validation Errors:', errorMessages.join(', '));
+                          $('#file-upload-errors').html(errorMessages.join('<br>'));
+                      }
+                      $('#file-upload-errors').show();
+                      $('#file-upload-success').hide(); // Hide success message
+                      $('#file-upload-details').hide(); // Hide details
+                  }
+              },
+              error: function (xhr, errmsg, err) {
+                  $('#file-upload-errors').html("Error al cargar el archivo. Por favor, inténtalo de nuevo.");
+                  $('#file-upload-errors').show();
+                  $('#file-upload-success').hide(); // Hide success message
+                  $('#file-upload-details').hide(); // Hide details
+              }
+          });
+          return false;
+      });
+      $('#detalleModal').on('hidden.bs.modal', function () {
+        window.location.reload();
+    });
+});
+
+</script>
+
+<script src="{% static 'base/js/table-jq-config.js' %}"></script>
+{% endblock %}

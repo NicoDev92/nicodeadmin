@@ -1,0 +1,19 @@
+{% extends 'base/base.html'%}
+
+{% block page_content %}
+<div class="container">
+
+    <!-- 404 Error Text -->
+    <div class="text-center">
+        <div  class="error-own error-container">
+            <div title="Forbbiden" class="error-own">Forbbiden</div>
+        </div>
+        <p class="lead text-gray-800 mb-5">Pagina no autorizada</p>
+        <mark>No tienes autorizacion para acceder a esta página</mark>
+        <p class="text-gray-500 mb-0 small">It looks like you found a glitch in the matrix...</p>
+        <a href="{% url 'bases:home' %}">&larr; Volver al inicio</a>
+    </div>
+
+</div>
+
+{% endblock %}

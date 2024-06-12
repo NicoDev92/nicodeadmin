@@ -1,0 +1,48 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-title">Contact Form</h1>
+            <form id="contact-form">
+                <div class="mb-3">
+                    <label for="user_name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="user_name" name="user_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="user_email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="user_email" name="user_email" required>
+                    <div id="emailHelp" className="form-text text-light fs-8">Nunca compartiremos tu e-mail con nadie! 🙊</div>
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Message</label>
+                    <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                </div>
+                <div class="m-3 w-100 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Include the EmailJS script -->
+<script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init("JrIXh10nYKMIw4rod"); // Replace with your actual EmailJS public key
+   })();
+   
+   document.getElementById('contact-form').addEventListener('submit', function(event) {
+       event.preventDefault();
+       emailjs.sendForm('service_dbqw8wn', 'template_xatyzrb', this)
+           .then(function() {
+               alert('Email sent successfully!');
+           }, function(error) {
+               alert('Failed to send email. Please try again later.');
+           });
+   });
+</script>
+{% endblock %}

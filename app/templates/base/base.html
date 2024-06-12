@@ -1,0 +1,366 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>NicodeAdmin-Manager</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="{% static 'base/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="{% static 'base/css/sb-admin-2.min.css' %}" rel="stylesheet">
+  <link href="{% static 'base/css/own-styles.css' %}" rel="stylesheet">
+  <link href="{% static 'base/vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+
+</head>
+
+<body id="page-top" class="bg-dark">
+
+{% block side_bar %}
+  <div id="wrapper">
+    <ul class="navbar-nav nav-bar-bg sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'bases:home' %}">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">NC_Admin<sup>2</sup></div>
+      </a>
+
+      <hr class="sidebar-divider my-0">
+
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'bases:home' %}">
+          <i class="fas fa-fw fa-tachometer-alt icon-medium"></i>
+          Panel de usuario
+        </a>
+      </li>
+
+      <hr class="sidebar-divider">
+
+      <!-- Punto de Venta -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseVentas" aria-expanded="true" aria-controls="collapseVentas">
+          <i class="fas fa-cash-register icon-medium pr-2"></i>Puntos de Venta:
+        </a>
+        <div id="collapseVentas" class="collapse" aria-labelledby="headingVentas" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            {% if perms.caja.add_venta%}
+            <a class="collapse-item" href="{% url 'caja:punto_venta' %}">Caja</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Caja</p>
+            {% endif %}
+          </div>
+        </div>
+      </li>
+      
+      <!-- Inventario -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseInventario" aria-expanded="true" aria-controls="collapseInventario">
+          <i class="fas fa-cubes icon-medium pr-2"></i>Inventario:
+        </a>
+        <div id="collapseInventario" class="collapse" aria-labelledby="headingInventario" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            {% if perms.inv.view_producto %}
+            <a class="collapse-item" href="{% url 'inv:producto_list' %}">Productos</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Productos</p>
+            {% endif %}
+            {% if perms.inv.view_categoria %}
+            <a class="collapse-item" href="{% url 'inv:categoria_list' %}">Categorías</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Categorías</p>
+            {% endif %}
+            {% if perms.inv.view_subcategoria %}
+            <a class="collapse-item" href="{% url 'inv:subcategoria_list' %}">Subcategorías</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Subcategorías</p>
+            {% endif %}
+            {% if perms.inv.view_marca %}
+            <a class="collapse-item" href="{% url 'inv:marca_list' %}">Marcas</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Marcas</p>
+            {% endif %}
+            {% if perms.inv.view_unidadmedida %}
+            <a class="collapse-item" href="{% url 'inv:um_list' %}">Unidades de medida</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Unidades de medida</p>
+            {% endif %}
+        </div>        
+        </div>
+      </li>
+      
+      <!-- Facturas -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGastos" aria-expanded="true" aria-controls="collapseGastos">
+          <i class="fas fa-file-invoice-dollar fa-rotate-180 icon-medium pl-2"></i>Registrar gastos:
+        </a>
+        <div id="collapseGastos" class="collapse" aria-labelledby="headingGastos" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            {% if perms.cmp.view_proveedor %}
+            <a class="collapse-item" href="{% url 'cmp:proveedor_list' %}">Proveedores</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Proveedores</p>
+            {% endif %}
+            {% if perms.cmp.view_factura %}
+            <a class="collapse-item" href="{% url 'cmp:factura_list' %}">Facturas</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Facturas</p>
+            {% endif %}
+          </div>
+        </div>
+      </li>
+      
+      <!-- Reportes -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReportes" aria-expanded="true" aria-controls="collapseReportes">
+          <i class="fas fa-chart-line icon-medium pr-2"></i>Reportes:
+        </a>
+        <div id="collapseReportes" class="collapse" aria-labelledby="headingReportes" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header text-gray-800">Mensuales</h6>
+            {% if perms.auth.change_user %}
+            <a class="collapse-item" href="{% url 'reportes:egresos_mensuales' %}">Gastos</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Gastos</p>
+            {% endif %}
+            {% if perms.auth.change_user %}
+            <a class="collapse-item" href="{% url 'reportes:ingresos_mensuales' %}">Ventas</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Ventas</p>
+            {% endif %}
+            <div class="dropdown-divider-own"></div>
+            <h6 class="collapse-header text-gray-800">Anuales</h6>
+            {% if perms.auth.change_user %}
+            <a class="collapse-item" href="{% url 'reportes:ingresos_egresos_mensuales' %}">Ventas y Gastos</a>
+            {% else %}
+            <p class="collapse-item text-muted" style="cursor: not-allowed; pointer-events: none;">Ventas y Gastos</p>
+            {% endif %}
+          </div>
+        </div>
+      </li>
+      
+      <hr class="sidebar-divider d-none d-md-block">
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
+    </ul>
+{% endblock side_bar %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+      <div id="content">
+        {% block top_bar %}
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown no-arrow mx-1">
+              <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell fa-fw icon-medium{% if facturas_vencidas|length > 0 or facturas_por_vencer|length > 0 or productos_stock_bajo|length > 0 %} text-warning bell-ring{% endif %}"></i>
+                {% with facturas_vencidas|length as vencidas_length %}
+                  {% with facturas_por_vencer|length as por_vencer_length %}
+                    {% with productos_stock_bajo|length as stock_bajo_length %}
+                      <span class="badge badge-pill badge-danger badge-counter">
+                        <span class="p-1">
+                          {% if vencidas_length|add:por_vencer_length|add:stock_bajo_length > 9%}
+                          +9
+                          {% else %}
+                          {{ vencidas_length|add:por_vencer_length|add:stock_bajo_length }}
+                          {% endif %}
+                        </span>
+                      </span>
+                    {% endwith %}
+                  {% endwith %}
+                {% endwith %}
+              </a>
+              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                {% if facturas_vencidas|length == 0  and facturas_por_vencer|length == 0 and productos_stock_bajo|length == 0 %}
+                <h6 class="dropdown-header text-cente">
+                  ¡Genial! No hay Notificaciones
+                </h6>
+                {% else %}
+                <h6 class="dropdown-header text-center">
+                  Notificaciones pendientes:
+                </h6>
+                {% endif %}
+                {% for factura in facturas_vencidas %}
+                <a class="dropdown-item d-flex align-items-center bg-info-own" href="{% url 'cmp:factura_list' %}">
+                  <div class="mr-3">
+                    <div class="icon-circle bg-danger">
+                      <i class="fas fa-exclamation-triangle text-white"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <span class="font-weight-bold p-0">Factura vencida</span>
+                    <div class="small text-gray-900">{{ factura.proveedor }}</div>
+                    <div class="small text-gray-900"><span class="font-weight-bold">Fecha Venc.: </span>{{ factura.fecha_vencimiento|date:"d/m/y" }}</div>
+                  </div>
+                </a>
+                {% endfor %}
+                {% for factura in facturas_por_vencer %}
+                <a class="dropdown-item d-flex align-items-center bg-info-own" href="{% url 'cmp:factura_list' %}">
+                  <div class="mr-3">
+                    <div class="icon-circle bg-warning">
+                      <i class="fas fa-exclamation-triangle text-white"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <span class="font-weight-bold">Factura por vencer</span>
+                    <div class="small text-gray-900">{{ factura.proveedor }}</div>
+                    <div class="small text-gray-900"><span class="font-weight-bold">Fecha Venc.: </span>{{ factura.fecha_vencimiento|date:"d/m/y" }}</div>
+                  </div>
+                </a>
+                {% endfor %}
+                {% for producto_stock_bajo in productos_stock_bajo %}
+                <a class="dropdown-item d-flex align-items-center bg-info-own" href="{% url 'inv:producto_list' %}">
+                  <div class="mr-3">
+                    <div {% if producto_stock_bajo.existencia < 0 %} class="icon-circle bg-danger" {% else %} class="icon-circle bg-danger" {% endif %} class="icon-circle bg-warning">
+                      <i class="fas fa-exclamation-triangle text-white"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-weight-bold">{{ producto_stock_bajo.descripcion }}</div>
+                    <span class="font-weight-bold">Stock: </span> 
+                    <span {% if producto_stock_bajo.existencia < 0 %} class="text-danger" {% endif %}>{{ producto_stock_bajo.existencia }}</span>
+                  </div>
+                </a>
+                {% endfor %}
+              </div>
+            </li>
+
+            <div class="topbar-divider d-none d-sm-block"></div>
+            <li class="nav-item dropdown no-arrow">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ usuario_nombre }} {{ usuario_apellido }}</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                <!-- <a class="dropdown-item" href="#">
+                  <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Profile
+                </a> -->
+                {% if perms.auth.change_user %}
+                <a class="dropdown-item" href="{% url 'admon:admin_home' %}">
+                  <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Panel de Admin
+                </a>
+                {% endif %}
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Cerrar Sesión
+                </a>
+              </div>
+            </li>
+          </ul>
+        </nav>
+        {% endblock top_bar %}
+
+        {% block page_content %}
+        <div class="container-fluid">
+          <h1 class="h3 mb-4 text-gray-800">Blank Page</h1>
+        </div>
+        {% endblock page_content %}
+
+        {% block footer %}
+      </div>
+
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Nicode {{ anio }}</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    {% endblock footer %}
+  </div>
+
+  {% block login %}
+  {% endblock %}
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Listo para salir?</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Seleccione "Cerrar sesión" para terminar la sesón. 
+          Cualquier registro sin guardar, u otro procedimiento en proceso, sera finalizado.
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+          <form action="{% url 'bases:logout' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Cerrar sesión</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="popup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content border-left-warning shadow h-100">
+        <div class="modal-header">
+          <h5 class="modal-title text-xs font-weight-bold text-warning text-uppercase" id="exampleModalLabel">Mensaje</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="h5 mb-0 font-weight-bold text-gray-800" id="message_content"></div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-comments fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-info text-gray-100" data-dismiss="modal" id="btn-modal">Aceptar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block control_modal %}
+  {% endblock %}
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="{% static 'base/vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'base/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="{% static 'base/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="{% static 'base/js/sb-admin-2.min.js' %}"></script>
+
+  <!-- Page level plugins -->
+  <script src="{% static 'base/vendor/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'base/vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+  
+  {% block js_page %}
+  {% endblock %}
+
+</body>
+
+</html>

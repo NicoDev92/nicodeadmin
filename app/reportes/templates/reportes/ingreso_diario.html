@@ -1,0 +1,73 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load reportes_filters %}
+
+
+{% block page_content %}
+<div class="container">
+    <h3 class="title">Ventas del {{fecha}}</h3>
+    {% if ingresos %}
+    {% for ingreso in ingresos %}
+        <div class="card border-left-info shadow h-100 p-0 mb-3">
+            <div class="card-header m-0">
+                <h6 class="m-0 font-weight-bold text-primary">Venta N°: {{ingreso.id}}</h6>
+            </div>
+
+                <a href="#collapseCard{{ ingreso.id }}" class="d-block card-header" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapseCard{{ ingreso.id }}">
+                    <h6 class="m-0 font-weight-bold text-primary">Detalles de la venta:</h6>
+                </a>
+                <div class="collapse" id="collapseCard{{ ingreso.id }}">
+                    <div class="card-body p-2">
+                        <table class="table table-sm text-gray-900 m-0">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detalle in detalles_ventas|get_item:ingreso.id %}
+                                <tr>
+                                    <td>{{ detalle.producto }}</td>
+                                    <td>{{ detalle.cantidad }}</td>
+                                    <td>{{ detalle.subtotal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <div class="card-footer text-center">
+                Total venta: <span class="font-weight-bold text-gray-800">${{ ingreso.total_venta }}</span>
+            </div>
+
+        </div>
+    {% endfor %}
+    
+    <div class="container text-right">
+        <!-- Botón para descargar el PDF -->
+        <button id="descargar-pdf" class="btn btn-info m-3">Descargar Reporte</button>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center"> No hay ventas registradas para esta fecha.</div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block js_page %}
+<script>
+    document.getElementById('descargar-pdf').addEventListener('click', function() {
+        // Obtener el mes y el año del input
+        var date ="{{date}}"
+        console.log(date)
+        if(date){
+            // Redireccionar a la URL de la vista que genera el PDF con el mes y el año como parámetros
+            window.location.href = "{% url 'reportes:generar_pdf_venta_dia' %}?date=" + date
+        } else {
+            mensaje('Debe seleccionar un mes y año para descargar el PDF');
+        }
+    });
+</script>
+{% endblock %}

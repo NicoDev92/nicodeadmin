@@ -1,0 +1,67 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<form method="POST" class="form-inline" id="subcategoria-form"  data-form-selector="#subcategoria-form" data-form-url="{% url 'inv:subcategoria_list' %}">
+    {% csrf_token %}
+    <div class="col-xl-10 col-md-10 m-auto">
+        {% if obj %}
+        <div class="card border-left-info shadow h-100 py-2">
+        {% else %}
+        <div class="card border-left-success shadow h-100 py-2">
+        {% endif %}
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                          <h3 class="{% if obj %} text-info {% else %} text-success {% endif %} Producto">
+                            {% if obj %}Editar Categoría:{% else %}Nueva Subcategoría:{% endif %}
+                          </h3>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="row">
+                            <div class="col-12">
+                                {{ form.categoria }}
+                            </div>
+                            <div class="col-12">
+                                <div class="input-group my-2">
+                                    <input type="text" class="form-control" name="descripcion" maxlength="100"
+                                        required id="id_descripcion" placeholder="Descripcion"
+                                        value="{% if obj %}{{obj.descripcion}}{% endif %}">
+                                </div>
+                            </div>
+                            <div class="col-10">
+                                <div class="input-group my-2">
+                                    <label for="id_estado">Estado Activo:</label>
+                                    <input type="checkbox" name="estado" class="form-control" id="id_estado" 
+                                    {% if obj.estado %} checked {% endif %}>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="row">
+                            <div class="col text-center">
+                                <button type="submit" class="btn bg-gradient-success text-gray-100 mx-2">
+                                    <span class="fa fa-save"></span>
+                                    Guardar
+                                </button>
+                                <a href="{% url 'inv:subcategoria_list' %}" class="btn bg-gradient-warning text-gray-100 mx-2">
+                                    <span class="fa fa-undo"></span>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</form>
+
+{% endblock %}
+
+{% block js_page %}
+<script src="{% static 'base/js/pop-ups-alerts.js' %}"></script>
+<script src="{% static 'base/js/validar-form.js' %}"></script>
+{% endblock %}

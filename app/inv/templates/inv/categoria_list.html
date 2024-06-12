@@ -1,0 +1,128 @@
+{% extends 'base/base.html' %}
+
+{% block page_content %}
+<!-- Dropdown -->
+<div class="card shadow m-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Listado de Categorías</h6>
+        <div>
+            <a class="btn bg-gradient-success text-gray-100" href="{% url 'inv:categoria_new' %}"><i class="fa fa-plus" aria-hidden="true"></i> Nueva Categoría</a>
+        </div>
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+        {% if not obj %}
+        <div class="alert alert-warning text-center"> No hay categorías</div>
+        {% else %}
+        <table class="table table-sm">
+            <thead class="small">
+                <th class="text-center">Descripción</th>
+                <th class="text-center">Estado</th>
+                <th class="text-center">F. Creación</th>
+                <th class="text-center">Última Modif.</th>
+                <th class="text-center">Más info</th>
+                <th class="text-center">Acciones</th>
+            </thead>
+            <tbody class="small text-gray-900">
+                {% for item in obj %}
+                <tr {% if item.estado %} class="bg-success-own" {% else %} class="bg-warning-own" {% endif %}>
+                    <td>{{ item.descripcion}}</td>
+                    <td>{{ item.estado | yesno:"Activo, Inactivo"}}</td>
+                    <td>{{ item.fecha_creacion|date:"H:i - d/m/y" }}</td>
+                    <td>{{ item.fecha_modificacion|date:"H:i - d/m/y"}}</td>
+
+                    <td class="text-center">
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle font-weight-bold text-gray-800" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                                <div class="card-body">
+                                    <div class="container d-flex flex-row">
+                                        <div class="col">
+                                            <ul class="list-group list-group-numbered">
+                                                <li class="list-group-item">
+                                                    <div class="font-weight-bold text-gray-800">Creado Por:</div>
+                                                    {{item.usuario_creador}}
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <div class="font-weight-bold text-gray-800">Modificado por:</div>
+                                                    {% if item.usuario_modifica %}
+                                                        {{ item.usuario_modifica_nombre }}
+                                                    {% else %}
+                                                        Sin modificar
+                                                    {% endif %}
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <div class="font-weight-bold text-gray-800">Estado:</div>
+                                                    <span {% if item.estado %} class="text-success" {% else %} class="text-danger" {% endif %}>
+                                                        {{item.estado|yesno:"Activo,Inactivo"}}
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                    
+                    
+                        <a href="{% url 'inv:categoria_edit' item.id %}" 
+                            class="btn bg-gradient-info text-gray-100 btn-sm m-1" 
+                            role="button">
+                                Editar
+                        </a>
+                        <form action="{% url 'inv:categoria_inactivar' item.id %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            {% if item.estado %}
+                            <button type="submit" class="btn bg-gradient-warning btn-sm text-gray-100 m-1">Inactivar</button>
+                            {% else %}
+                            <button type="submit" class="btn bg-gradient-success btn-sm  text-gray-100 m-1">Activar</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block js_page %}
+<script>
+    // Call the database jQuery plugin
+    $(document).ready(function() {
+        $('.table').DataTable({
+        "language": {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "No hay ningún dato disponible",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros totales",
+            "sInfoEmpty": "Mostrando 0 registros de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "<span class='fa fa-angle-double-left'></span>",
+                "sLast": "<span class='fa fa-angle-double-right'></span>",
+                "sNext": "<span class='fa fa-angle-right'></span>",
+                "sPrevious": "<span class='fa fa-angle-left'></span>"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        }
+        });
+    });
+</script>
+{% endblock %}

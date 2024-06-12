@@ -1,0 +1,118 @@
+{% extends 'base/base.html'%}
+{% load static %}
+
+{% block page_content %}
+<div class="container">
+    <h1>{{ saludo }}, {{ usuario_nombre }}</h1>
+    <span class="small">{{ frase }}</span>
+
+    <div class="row mt-4">
+        <div class="col-lg-6 col-md-6 mb-4 d-flex justify-content-center">
+          <div class="card border-left-info shadow h-100 w-75 py-2">
+              <a class="item" href="{% url 'caja:punto_venta' %}">
+                <div class="card-body text-center">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="row no-gutters align-items-center">
+                        <div class="col">
+                          <i class="fas fa-cash-register icon-index pr-2"></i>
+                        </div>
+                      </div>
+                      <div class="text-lg font-weight-bold text-info text-uppercase my-3">Puntos de ventas</div>
+                    </div>
+                    <div class="col-auto">
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 mb-4 d-flex justify-content-center">
+          <div class="card border-left-info shadow h-100 w-75 py-2">
+              <a href="{% url 'inv:producto_list' %}">
+                <div class="card-body text-center">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="row no-gutters align-items-center">
+                        <div class="col">
+                          <i class="fas fa-cubes icon-index pr-2"></i>
+                        </div>
+                      </div>
+                      <div class="text-lg font-weight-bold text-info text-uppercase my-3">Productos</div>
+                    </div>
+                    <div class="col-auto">
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 mb-4 d-flex justify-content-center">
+          <div class="card border-left-info shadow h-100 w-75 py-2">
+              <a href="{% url 'cmp:factura_new' %}">
+                <div class="card-body text-center">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="row no-gutters align-items-center">
+                        <div class="col">
+                          <i class="fas fa-file-invoice-dollar fa-rotate-180 icon-index pl-2"></i>
+                        </div>
+                      </div>
+                      <div class="text-lg font-weight-bold text-info text-uppercase my-3">Registrar Nueva Factura</div>
+                    </div>
+                    <div class="col-auto">
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 mb-4 d-flex justify-content-center">
+          <div class="card border-left-info shadow h-100 w-75 py-2">
+              <a href="#" id="ventas_hoy">
+                <div class="card-body text-center">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="row no-gutters align-items-center">
+                        <div class="col">
+                          <i class="fas fa-chart-line icon-index pr-2"></i>
+                        </div>
+                      </div>
+                      <div class="text-lg font-weight-bold text-info text-uppercase my-3">Ventas de Hoy</div>
+                    </div>
+                    <div class="col-auto">
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js_page %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var urlIngresoDiario = "{% url 'reportes:ingreso_diario' %}";
+    var cardLink = document.getElementById("ventas_hoy");
+    // Obtener la fecha de hoy en formato YYYY-MM-DD
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    var dd = String(today.getDate()).padStart(2, '0');
+    var formattedDate = yyyy + '-' + mm + '-' + dd;
+
+    // Obtener el href actual y concatenar la fecha
+    var currentHref = urlIngresoDiario;
+    var newHref = currentHref + '?date=' + formattedDate;
+    cardLink.onclick = function() {
+      window.location.href = newHref;
+    };
+  });
+</script>
+{% endblock %}
+
+

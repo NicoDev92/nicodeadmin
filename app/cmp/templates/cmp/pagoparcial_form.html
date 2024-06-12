@@ -1,0 +1,157 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<form id="pago-parcial-form" role="form" method="POST" class="form-inline m-auto" data-form-selector="#pago-parcial-form" data-form-url="{% url 'cmp:factura_list' %}">
+    {% csrf_token %}
+    <div class="col-xl-10 col-md-10 m-auto">
+        {% if obj %}
+            <div class="card border-left-info shadow h-100 py-2">
+            {% else %}
+            <div class="card border-left-success shadow h-100 py-2">
+            {% endif %}
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <h3 class="{% if obj %} text-info {% else %} text-success {% endif %} Producto">
+                            {% if obj %} Editar Pago {% else %} Nueva Pago {% endif %}
+                        </h3>
+                        <div class="dropdown-divider"></div>
+                        <div class="row">
+                            {% if form.errors %}
+                            <div class="container text-center">
+                                <div class="alert alert-danger">
+                                    <small class="text-danger">
+                                    {% for field in form %}
+                                    {% if field.errors %}
+                                    {% for error in field.errors %}
+                                    {{ error |escape }}
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% endfor %}
+                                
+                                    {% if form.non_field_errors %}
+                                    {% for error in form.non_field_errors %}
+                                    {{ error | escape}}
+                                    {% endfor %}
+                                    {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="col-12">
+                                {{form.factura}}
+                                <div class="row">
+                                    <div class="col my-2">
+                                        <h6>Monto Total a Pagar:</h6>
+                                        <p class="p-0 m-0 font-weight-bold" id="monto_total_pagar" data-monto-total-pagar="{{ monto_total_pagar }}">${{ monto_total_pagar }}</p>
+                                    </div>
+                                    <div class="col my-2">
+                                        <h6>Monto Total Pagado:</h6>
+                                        <p class="p-0 m-0 font-weight-bold" id="monto_total_pagado" data-monto-total-pagado="{{ monto_total_pagado }}">${{ monto_total_pagado }}</p>
+                                    </div>
+                                    <div class="col my-2">
+                                        <h6>Remanente de pago:</h6>
+                                        <span class="p-0 m-0 font-weight-bold">$<span class="p-0 m-0 font-weight-bold" id="remanente_pago"></span></span>
+                                    </div>
+                                </div>
+                                <div class="input-group my-2">
+                                    <label for="id_fecha_pago">Fecha de Pago:</label>
+                                </div>
+                                <div class="input-group my-2">
+                                    <input type="date" name="fecha_pago" class="form-control" id="id_fecha_pago" required
+                                    value="{% if obj %}{{ obj.fecha_pago|date:'Y-m-d' }}{% endif %}">
+                                </div>
+                                <div class="input-group my-2">
+                                    <label for="id_monto">Monto:</label>
+                                </div>
+                                <div class="input-group my-2">
+                                    <input type="text" class="form-control" name="monto" class="form-control" id="id_monto" required
+                                    value="{% if obj and obj.monto %}{{ obj.monto }}{% endif %}"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="row">
+                            <div class="col text-center">
+                                <button type="submit" class="btn bg-gradient-success text-gray-100 mx-2">
+                                    <span class="fa fa-save"></span>
+                                    Guardar
+                                </button>
+                                <a href="{% url 'cmp:factura_list' %}" class="btn bg-gradient-warning text-gray-100 mx-2">
+                                    <span class="fa fa-undo"></span>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+
+{% block js_page %}
+<script>
+    function calcularRemanente() {
+        // Obtener los valores como cadenas de texto
+        var montoTotalPagarStr = document.getElementById('monto_total_pagar').getAttribute('data-monto-total-pagar');
+        var montoTotalPagadoStr = document.getElementById('monto_total_pagado').getAttribute('data-monto-total-pagado');
+        
+        // Reemplazar comas por puntos en caso de que se usen comas como separadores decimales
+        montoTotalPagarStr = montoTotalPagarStr.replace(',', '.');
+        montoTotalPagadoStr = montoTotalPagadoStr.replace(',', '.');
+        
+        // Convertir los valores a números decimales
+        var montoTotalPagar = parseFloat(montoTotalPagarStr);
+        var montoTotalPagado = parseFloat(montoTotalPagadoStr);
+        
+        // Calcular el remanente de pago
+        var remanentePago = montoTotalPagar - montoTotalPagado;
+        
+        // Mostrar el remanente de pago en el campo correspondiente
+        document.getElementById('remanente_pago').textContent = remanentePago.toFixed(2);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        calcularRemanente();
+    });
+</script>
+<script>
+    function validarFlotantes() {
+        var total_pagar = document.getElementById("id_monto");
+    
+        // Función para procesar un campo: reemplazar comas por puntos y convertir a flotante
+        function procesarCampo(input) {
+            var value = input.value.trim();
+            if (value !== '') {
+                input.value = value.replace(',', '.');
+                return parseFloat(input.value);
+            } else {
+                return 0;
+            }
+        }
+        // Procesar cada campo
+        var totalPagarValue = procesarCampo(total_pagar);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        validarFlotantes();
+    });
+
+    document.getElementById('id_monto').addEventListener('input', function() {
+        var total_pagar = document.getElementById("id_monto");
+        // Reemplazar comas por puntos
+        total_pagar.value = total_pagar.value.replace(',', '.');
+        // Eliminar caracteres no numéricos
+        total_pagar.value = total_pagar.value.replace(/[^0-9.]/g, '');
+    });
+</script>
+
+<script src="{% static 'base/js/pop-ups-alerts.js' %}"></script>
+<script src="{% static 'base/js/validar-form.js' %}"></script>
+{% endblock %}

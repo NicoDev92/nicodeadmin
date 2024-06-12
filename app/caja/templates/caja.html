@@ -1,0 +1,422 @@
+{% extends 'base/base.html' %}
+
+{% block page_content %}
+    <!-- Formulario de búsqueda -->
+    <form class="m-4" id="search-form" method="post">
+        {% csrf_token %}
+        <div class="input-group">
+            <!-- Campo de búsqueda -->
+            {{ producto_form.buscar }}
+            <div class="input-group-append">
+                <!-- Botón de búsqueda -->
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search fa-sm"> Buscar</i>
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <div class="dropdown-divider my-4"></div>
+    {% if productos %}
+        <!-- Contenedor de resultados de búsqueda -->
+        <div class="container text-center scrollable-container">
+            <div id="search-results">
+                <!-- Tabla de resultados de búsqueda -->
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>Cód. Interno</th>
+                            <th>Descripción</th>
+                            <th>$/un</th>
+                            <th>Un. medida</th>
+                            <th>Cod.Barr</th>
+                            <th>Cantidad</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="small text-gray-900">
+                        <!-- Filas de resultados de búsqueda -->
+                        {% for producto in productos %}
+                        <tr {% if producto.estado %} class="" {% else %} class="bg-inactive-own" {% endif %}>
+                            
+                            <td>{{ producto.codigo }}</td>
+                            <td>{{ producto.descripcion }}</td>
+                            <td>{{ producto.precio_venta }}</td>
+                            <td>{{ producto.unidad_medida }}</td>
+                            <td>{{ producto.codigo_barra }}</td>
+                            
+                            <td>
+                                <!-- Campo de cantidad -->
+                                <input type="text" 
+                                    class="form-control form-control-sm cantidad-input" 
+                                    data-product-id="{{ producto.id }}" 
+                                    id="id_cantidad_{{ producto.id }}"
+                                    {% if not producto.estado or producto.precio_venta is none or producto.precio_venta <= 0 %} readonly {% endif %}>
+                            </td>
+                            <td class="total-cell">{{ producto.precio_venta }}</td>
+                            <td>
+                                <!-- Botón para agregar al carrito -->
+                                <button type="button" 
+                                    {% if not producto.estado or producto.precio_venta is none or producto.precio_venta <= 0 %} class="btn btn-secondary btn-sm" disabled 
+                                    {% else %} class="btn btn-primary btn-sm btn-add-to-cart" {% endif %} 
+                                    data-product-id="{{ producto.id }}">Agregar</button>
+                            </td>
+                            
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <!-- Mensaje si no hay productos -->
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="alert alert-warning text-center">No hay Productos para mostrar</div>
+        </div>
+    {% endif %}
+    <div class="dropdown-divider my-4"></div>
+    <div class="container m-3">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <!-- Título de la sección -->
+                <span>Compra</span>
+                <!-- Botón para limpiar el carrito -->
+                <button type="button" class="btn btn-danger btn-sm" id="clear-cart">
+                    <i class="fas fa-trash-alt"></i> Limpiar Carrito
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Tabla de carrito -->
+                <table class="table table-sm table-striped" id="cart-table">
+                    <thead class="small">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        <!-- Aquí se cargarán los productos del carrito -->
+                    </tbody>
+                </table>
+                <!-- Total del carrito -->
+                <div class="d-flex justify-content-end bg-success-own border border-succes rounded rounded-lg">
+                    <h5 class="m-4">Total: $ <span class="font-weight-bold text-dark" id="cart-total">0.00</span></h5>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-5"></div>
+                    <div class="col-7">
+                        <!-- Formulario de compra -->
+                        <form id="purchase-form" method="post" action="{% url 'caja:punto_venta' %}">
+                            {% csrf_token %}
+                            <div class="mb-2">
+                                <!-- Selección del método de pago -->
+                                {{ venta_form.metodo_pago.label_tag }}
+                                {{ venta_form.metodo_pago }}
+                            </div>
+                            <div class="mb-2">
+                                <!-- Total de la venta -->
+                                <input class="form-control" type="text" name="total_venta" id="id_total_venta" readonly>
+                            </div>
+                            <div class="mb-2">
+                                <!-- Fecha de la venta -->
+                                <input class="form-control" type="date" name="fecha_venta" id="id_fecha_venta" readonly>
+                            </div>
+                            <!-- Campo oculto para el carrito -->
+                            <input type="hidden" name="cart" id="cart-input">
+                            <div class="m-3 text-center">
+                                <!-- Botón para guardar la compra -->
+                                <button type="submit" class="btn btn-success w-100">Guardar Compra</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de mensaje -->
+    <div class="modal fade" id="popup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-left-warning shadow h-100">
+                <div class="modal-header">
+                    <!-- Título del modal -->
+                    <h5 class="modal-title text-xs font-weight-bold text-warning text-uppercase" id="exampleModalLabel">Mensaje</h5>
+                    <!-- Botón para cerrar el modal -->
+                    <button type="button" class="close" data-dismiss="modal" onclick="cerrarModal()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Contenido del mensaje -->
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="message_content"></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- Botón para aceptar el mensaje -->
+                    <a href="#" class="btn btn-info text-gray-100" data-dismiss="modal" onclick="cerrarModal()" id="btn-modal">Aceptar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}
+
+{% block js_page %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+
+/**
+ * Muestra un mensaje en un modal emergente.
+ * @param {string} message - El mensaje a mostrar.
+ */
+function mensaje(message) {
+    var modal = document.getElementById('popup');
+    var messageContent = document.getElementById('message_content');
+    messageContent.textContent = message;
+    modal.classList.add('show');
+    modal.style.display = 'block';
+}
+
+/**
+ * Cierra el modal emergente.
+ */
+function cerrarModal() {
+    var modal = document.getElementById('popup');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+}
+
+/**
+ * Carga el carrito desde localStorage y actualiza la interfaz.
+ */
+function loadCart() {
+    try {
+        var currentDate = new Date();
+        var formattedDate = currentDate.getFullYear() + '-' + ('0' + (currentDate.getMonth() + 1)).slice(-2) + '-' + ('0' + currentDate.getDate()).slice(-2);
+        $('#id_fecha_venta').val(formattedDate);
+
+        var cart = JSON.parse(localStorage.getItem('cart')) || {};
+        var cartTableBody = $('#cart-table tbody');
+        cartTableBody.empty();
+        $.each(cart, function (productId, product) {
+            cartTableBody.append(`
+                <tr data-product-id="${productId}">
+                    <td>${product.name}</td>
+                    <td>
+                        <input type="text" class="form-control cart-quantity-input w-75 cantidad-input" data-product-id="${productId}" value="${product.quantity}">
+                    </td>
+                    <td class="cart-total-cell">${product.total.toFixed(2)}</td>
+                    <td>
+                        <button type="button" class="btn btn-warning btn-sm m-1 btn-modify-from-cart" data-product-id="${productId}">Modificar</button>
+                        <button type="button" class="btn btn-danger btn-sm m-1 btn-remove-from-cart" data-product-id="${productId}">Eliminar</button>
+                    </td>
+                </tr>
+            `);
+        });
+        updateCartTotal();
+        console.log(cart)
+    } catch (error) {
+        mensaje('Error al cargar el carrito: ' + error.message);
+    }
+}
+
+/**
+ * Actualiza el total del carrito y la interfaz.
+ */
+function updateCartTotal() {
+    try {
+        var cart = JSON.parse(localStorage.getItem('cart')) || {};
+        var total = 0;
+        $.each(cart, function (productId, product) {
+            total += product.total;
+        });
+        total = Math.round(total * 1000) / 1000;
+        $('#cart-total').text(total.toFixed(2));
+        $('#id_total_venta').val(total.toFixed(2));
+        $('#cart-input').val(JSON.stringify(cart));
+    } catch (error) {
+        mensaje('Error al actualizar el total del carrito: ' + error.message);
+    }
+}
+
+/**
+ * Actualiza el carrito en localStorage y la interfaz.
+ * @param {number} productId - El ID del producto.
+ * @param {number} quantity - La cantidad del producto.
+ * @param {number} total - El total del producto.
+ * @param {boolean} replace - Indica si se debe reemplazar la cantidad o sumar.
+ */
+function updateCart(productId, quantity, total, replace) {
+    try {
+        var cart = JSON.parse(localStorage.getItem('cart')) || {};
+    } catch (error) {
+        mensaje('Error al actualizar el carrito: ' + error.message);
+    }
+    var productName = $('#id_cantidad_' + productId).closest('tr').find('td:eq(1)').text();
+    var productPrice = parseFloat($('#id_cantidad_' + productId).closest('tr').find('td:eq(2)').text().replace(',', '.'));
+
+    if (replace) {
+        if (cart[productId]) {
+            cart[productId].quantity += quantity;
+            cart[productId].total += total;
+        } else {
+            cart[productId] = {
+                id: productId,
+                name: productName,
+                price: productPrice,
+                quantity: quantity,
+                total: total
+            };
+        }
+    } else {
+        cart[productId].quantity = quantity;
+        cart[productId].total = total;
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    loadCart();
+}
+
+// Documento listo
+$(document).ready(function () {
+    // Cargar el carrito al cargar la página
+    loadCart();
+
+    // Evento para cambiar la cantidad de productos directamente en el carrito
+    $(document).on('change', '.cart-quantity-input', function () {
+        try {
+            var productId = $(this).data('product-id');
+            var newQuantity = parseFloat($(this).val());
+            var cart = JSON.parse(localStorage.getItem('cart')) || {};
+            if (!isNaN(newQuantity) && newQuantity > 0) {
+                if (cart[productId].quantity !== newQuantity) {
+                    var productPrice = cart[productId].price;
+                    var newTotal = newQuantity * productPrice;
+                    updateCart(productId, newQuantity, newTotal, false);
+                }
+            } else {
+                mensaje('Cantidad inválida');
+                $(this).val(cart[productId].quantity);
+            }
+        } catch (error) {
+            mensaje('Error al cambiar la cantidad en el carrito: ' + error.message);
+        }
+    });
+
+    // Evento para modificar la cantidad del producto en el carrito usando el botón "Modificar"
+    $(document).on('click', '.btn-modify-from-cart', function () {
+        try {
+            var productId = $(this).data('product-id');
+            var inputElement = $(this).closest('tr').find('.cart-quantity-input');
+            var newQuantity = parseFloat(inputElement.val());
+            var cart = JSON.parse(localStorage.getItem('cart')) || {};
+
+            if (!isNaN(newQuantity) && newQuantity >= 0) {
+                if (cart[productId].quantity !== newQuantity) {
+                    var productPrice = cart[productId].price;
+                    var newTotal = newQuantity * productPrice;
+                    updateCart(productId, newQuantity, newTotal, false);
+                }
+            } else {
+                mensaje('Cantidad inválida');
+                inputElement.val(cart[productId].quantity);
+            }
+        } catch (error) {
+            mensaje('Error al modificar la cantidad del producto en el carrito: ' + error.message);
+        }
+    });
+
+    // Evento para quitar un producto del carrito usando el botón "Eliminar"
+    $(document).on('click', '.btn-remove-from-cart', function () {
+        try {
+            var cart = JSON.parse(localStorage.getItem('cart')) || {};
+            var productId = $(this).data('product-id');
+            delete cart[productId];
+            localStorage.setItem('cart', JSON.stringify(cart));
+        } catch (error) {
+            mensaje('Error al eliminar el producto del carrito: ' + error.message);
+        }
+        loadCart();
+    });
+
+    // Evento para agregar un producto al carrito
+    $('.btn-add-to-cart').click(function () {
+        try {
+            var productId = $(this).data('product-id');
+            var quantity = parseFloat($('#id_cantidad_' + productId).val());
+            var productPrice = parseFloat($('#id_cantidad_' + productId).closest('tr').find('td:eq(2)').text().replace(',', '.'));
+            var total = quantity * productPrice;
+
+            if (!isNaN(quantity) && quantity > 0) {
+                updateCart(productId, quantity, total, true);
+            } else {
+                mensaje('Cantidad inválida');
+            }
+        } catch (error) {
+            mensaje('Error al agregar el producto al carrito: ' + error.message);
+        }
+    });
+
+    // Evento para limpiar el carrito
+    $('#clear-cart').click(function () {
+        try {
+            localStorage.removeItem('cart');
+            loadCart();
+        } catch (error) {
+            mensaje('Error al limpiar el carrito: ' + error.message);
+        }
+    });
+
+    // Envío del formulario de compra
+    $('#purchase-form').submit(function (event) {
+        event.preventDefault();
+        var formData = $(this).serialize();
+        var cart = JSON.parse(localStorage.getItem('cart')) || {};
+
+        if (Object.keys(cart).length === 0) {
+            mensaje('El carrito está vacío');
+        } else {
+            $.ajax({
+                type: $(this).attr('method'),
+                url: $(this).attr('action'),
+                data: formData,
+                success: function () {
+                    mensaje('La compra se realizó con éxito');
+                    localStorage.removeItem('cart');
+                    setTimeout(function () {
+                        cerrarModal();
+                        window.location.replace("{% url 'caja:punto_venta' %}");
+                    }, 2000);
+                },
+                error: function (xhr, status, error) {
+                    var errorMessage = '';
+                    if (xhr.responseJSON.errors && Object.keys(xhr.responseJSON.errors).length > 0) {
+                        console.log(xhr.responseJSON.errors);
+                        for (var field in xhr.responseJSON.errors) {
+                            var errorList = xhr.responseJSON.errors[field];
+                            for (var i = 0; i < errorList.length; i++) {
+                                errorMessage += errorList[i] + '\n';
+                            }
+                        }
+                    } else {
+                        errorMessage = 'Se produjo un error al procesar la solicitud.';
+                    }
+                    mensaje(errorMessage);
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

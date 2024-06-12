@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<div class="container">
+    <h3 class="title">Ventas Mensuales</h3>
+    {% if not ingresos %}
+    <span class="small">Para ver el reporte de las ventas, por favor seleccione un mes:</span>
+    {% endif %}
+    <!-- Filtro del mes -->
+    <div class="container d-flex justify-content-end">
+        <div class="m-4">
+            <form method="get" action="{% url 'reportes:ingresos_mensuales' %}" class="form-inline">
+                <div class="form-group m-2">
+                    <label for="month" class="sr-only">Mes</label>
+                    <input type="month" id="month" name="month" class="form-control" value="{{ request.GET.month }}">
+                </div>
+                <button type="submit" class="btn btn-primary m-2">Filtrar</button>
+            </form>
+        </div>
+    </div>
+    {% if ingresos %}
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{{ selected_month }} {{ selected_year }}</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-area">
+                <canvas id="myAreaChart" 
+                        data-labels='{{ chart_data.labels|safe }}' 
+                        data-data='{{ chart_data.data|safe }}'
+                        data-fecha='{{ selected_month }}-{{ selected_year }}'>
+                </canvas>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Productos vendidos para {{ selected_month }} {{ selected_year }}</h6>
+        </div>
+        <div class="card-body bar-chart-class">
+            <div class="chart-bar">
+                <canvas id="myBarChart" 
+                        data-productos='{{ bar_chart_data.labels|safe }}' 
+                        data-cantidades='{{ bar_chart_data.data|safe }}'>
+                </canvas>
+            </div>
+            <hr>
+        </div>
+    </div>
+    <div class="container text-right">
+        <!-- Botón para descargar el PDF -->
+        <button id="descargar-pdf" class="btn btn-info m-3">Descargar Reporte</button>
+    </div>
+</div>
+{% else %}
+    <div class="alert alert-info text-center">
+        Realice una Búsqueda
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block js_page %}
+<script>
+    document.getElementById('descargar-pdf').addEventListener('click', function() {
+        // Obtener el mes y el año del input
+        var month = document.getElementById('month').value;
+        console.log(month)
+        if(month){
+            // Redireccionar a la URL de la vista que genera el PDF con el mes y el año como parámetros
+            window.location.href = "{% url 'reportes:generar_pdf_ventas_mensual' %}?month=" + month
+        } else {
+            mensaje('Debe seleccionar un mes y año para descargar el PDF');
+        }
+    });
+</script>
+    <script src="{% static 'base/js/charts/charts_boundle/Chart.min.js' %}"></script>
+    <script src="{% static 'base/js/charts/charts_js/chart-area.js' %}"></script>
+    <script src="{% static 'base/js/charts/charts_js/chart-bar.js' %}"></script>
+    <script src="{% static 'base/js/table-jq-config.js' %}"></script>
+
+    <script>
+        var urlIngresoDiario = "{% url 'reportes:ingreso_diario' %}";
+    </script>
+{% endblock %}

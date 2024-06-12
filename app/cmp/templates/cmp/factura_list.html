@@ -1,0 +1,141 @@
+{% extends 'base/base.html' %}
+{% load cmp_filters %}
+{% load static %}
+
+{% block page_content %}
+<div class="card shadow m-4">
+  <!-- Card Header - Dropdown -->
+  <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+    <h6 class="m-0 font-weight-bold text-primary">Listado de Facturas</h6>
+    <div>
+      <a class="btn bg-gradient-success text-gray-100" href="{% url 'cmp:factura_new' %}"><i class="fa fa-plus" aria-hidden="true"></i> Nueva Factura</a>
+  </div>
+  </div>
+  <!-- Card Body -->
+  <div class="card-body m-2">
+    {% if not obj %}
+    <div class="alert alert-warning text-center">No hay Facturas</div>
+    {% else %}
+    <table class="table table-striped table-sm">
+      <thead class="small">
+        <th class="text-center">Proveedor</th>
+        <th class="text-center">F. Emisión</th>
+        <th class="text-center">F. Vencimiento</th>
+        <th class="text-center">Acciones</th>
+      </thead>
+      <tbody class="small text-gray-900">
+        {% for item in obj%}
+        <tr class="{{ item.fecha_vencimiento|color_class:item.estado_factura }}">
+          <td>{{ item.proveedor }}</td>
+          <td>{{ item.fecha_emision|date:"d/m/y" }}</td>
+          <td>{{ item.fecha_vencimiento|date:"d/m/y" }}</td>
+          <td class="">
+            <div class="w-100 text-center">
+              <button class="btn bg-gradient-info text-gray-100 btn-sm m-1" role="button" data-toggle="modal" data-target="#detalleFacturaModal{{ forloop.counter }}">
+                Detalles
+              </button>
+              
+              <a href="{% url 'cmp:factura_edit' item.id %}" class="btn bg-gradient-warning text-gray-100 btn-sm m-1" role="button">Editar</a> 
+  
+              {% if item.estado_factura != 'pagada'%}
+              <a class="btn btn-sm bg-gradient-success text-gray-100 btn-sm m-1" href="{% url 'cmp:pagoparcial_new' item.id %}">Agregar pago</a>
+              {% else %}
+              <button class="btn btn-sm bg-gray-700 text-gray-100 btn-sm m-1" disabled="disabled" disabled>Agregar pago</button>
+              {% endif %}
+            </div>
+  
+            <div class="modal fade" id="detalleFacturaModal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="detalleFacturaModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content border-left-info">
+                  <div class="modal-header bg-info-own">
+                    <h5 class="modal-title" id="detalleFacturaModalLabel">Detalles de la factura: {{item.proveedor}} - Factura N°: {{item.numero_factura}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col">
+                        <ul class="list-group">
+                          <li class="list-group-item"><span class="font-weight-bold">Factura N°: </span>{{item.numero_factura}}</li>
+                          <li class="list-group-item"><span class="font-weight-bold">Proveedor: </span>{{item.proveedor}}</li>
+                          <li class="list-group-item"><span class="font-weight-bold">Fecha de emisón: </span>{{item.fecha_emision|date:"d/m/y"}}</li>
+                        </ul>
+                      </div>
+                      <div class="col">
+                        <ul class="list-group">
+                          <li class="list-group-item"><span class="font-weight-bold">Total a pagar: </span>${{item.total_pagar}}</li>
+                          <li class="list-group-item"><span class="font-weight-bold">Remanente de pago: </span>${{item.remanente_pago}}</li>
+                          <li class="list-group-item {{ item.fecha_vencimiento|color_class:item.estado_factura }}">
+                            <span class="font-weight-bold">Fecha de vencimiento: </span>{{item.fecha_vencimiento|date:"d/m/y"}}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <ul class="list-group mt-4">
+                      <div class="list-group-item"><span class="font-weight-bold">Estado: </span>{{item.estado_factura}}</div>
+                      <div class="list-group-item"><span class="font-weight-bold">Notas: </span>{% if item.notas %}{{item.notas}}{% else %}No se han agregado notas.{% endif %}</div>
+                    </ul>
+                    <div class="row">
+                      <h5 class="font-weight-bold m-2">Pagos Parciales:</h5>
+                      <div class="container">
+                        <ul class="list-group w-100">
+                          {% for pago in item.pagos_parciales.all %}
+                            <li class="list-group-item w-100">
+                              <div class="row d-flex justify-content-between">
+                                <div class="col-10">
+                                  <span class="font-weight-bold">Fecha: </span>{{ pago.fecha_pago|date:"d/m/y" }},<br>
+                                  <span class="font-weight-bold">Monto: </span>{{ pago.monto }} 
+                                </div>
+                                <div class="col-2">
+                                  <a class="btn btn-sm bg-gradient-success text-gray-100 btn-sm m-1" href="{% url 'cmp:pagoparcial_edit' item.id %}?pago_id={{pago.id}}">Editar</a>
+                                </div>
+                              </div>
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item">No hay pagos parciales registrados.</li>
+                            {% endfor %}
+                            <li class="list-group-item w-100 text-center font-weight-bold">
+                              Total de pagos parciales: ${{item.suma_pagos_parciales}}
+                            </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="w-100 d-flex justify-content-end">
+                      <div class="m-2">
+                        <a href="{% url 'reportes:factura_info_download' item.id %}" class="btn btn-info">Descargar</a>
+                      </div>
+                    </div>
+                    <div class="container d-flex flex-row modal-lg">
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+        </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+</div>
+
+
+
+{% endblock %}
+{% block js_page %}
+
+<script>
+  $(document).ready(function(){
+    $('#dropdownMenuLink').click(function(){
+        $('#detalleFacturaModal').modal('show');
+    });
+});
+</script>
+
+<script src="{% static 'base/js/table-jq-config.js' %}"></script>
+
+{% endblock %}

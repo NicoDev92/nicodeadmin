@@ -1,0 +1,105 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<div class="container">
+    <h3 class="title">Egresos Mensuales</h3>
+    {% if not egresos %}
+    <span class="small">Para ver el reporte de los egresos, por favor seleccione un mes:</span>
+    {% endif %}
+
+    <!-- Filtro del mes -->
+    <div class="container d-flex justify-content-end">
+        <div class="m-4">
+            <form method="get" action="{% url 'reportes:egresos_mensuales' %}" class="form-inline">
+                <div class="form-group m-2">
+                    <label for="month" class="sr-only">Mes</label>
+                    <input type="month" id="month" name="month" class="form-control" value="{{ request.GET.month }}">
+                </div>
+                <button type="submit" class="btn btn-primary m-2">Filtrar</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Contenedor para el chart y la tabla -->
+    {% if egresos %}
+    <div class="container text-center">
+        <div class="row">
+            <!-- Columna para el chart -->
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            {{ selected_month }} {{ selected_year }}
+                        </h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-pie pt-4">
+                            <canvas id="myPieChart" 
+                                    data-labels='{{ chart_data.labels|safe }}' 
+                                    data-data='{{ chart_data.data|safe }}'>
+                            </canvas>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+            <!-- Columna para la tabla -->
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <table class="table table-striped table-responsive-sm">
+                            <thead class="small">
+                                <th class="text-center">Proveedor</th>
+                                <th class="text-center">Emisión</th>
+                                <th class="text-center">Vencimiento</th>
+                            </thead>
+                            <tbody class="small text-gray-900">
+                                {% for item in egresos %}
+                                <tr>
+                                    <td>{{ item.proveedor }}</td>
+                                    <td>{{ item.fecha_emision|date:"d/m/y" }}</td>
+                                    <td>{{ item.fecha_vencimiento|date:"d/m/y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container text-right">
+        <!-- Botón para descargar el PDF -->
+        <button id="descargar-pdf" class="btn btn-info m-3">Descargar Reporte</button>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        Realice una Búsqueda
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block js_page %}
+<script>
+    document.getElementById('descargar-pdf').addEventListener('click', function() {
+        // Obtener el mes y el año del input
+        var month = document.getElementById('month').value;
+        console.log(month)
+        if(month){
+            // Redireccionar a la URL de la vista que genera el PDF con el mes y el año como parámetros
+            window.location.href = "{% url 'reportes:generar_pdf_egresos_mensual' %}?month=" + month
+        } else {
+            mensaje('Debe seleccionar un mes y año para descargar el PDF');
+        }
+    });
+</script>
+    <script src="{% static 'base/js/charts/charts_boundle/Chart.min.js' %}"></script>
+    <script src="{% static 'base/js/charts/charts_js/chart-pie.js' %}"></script>
+    <script src="{% static 'base/js/table-jq-config.js' %}"></script>
+{% endblock %}

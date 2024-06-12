@@ -1,0 +1,101 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<div class="container mt-4">
+    <h1>{% if form.instance.pk %}Editar{% else %}Agregar{% endif %} Grupo</h1>
+    <div class="mb-3">
+        <span class="small">Al agregar usuarios a los grupos, estos usuarios tendran todos los permisos que el grupo contenga y no será necesario agregarles individualmente estos permisos.</span>
+    </div>
+    <form id="group-form" method="POST" class="text-gray-900" data-form-selector="#group-form" data-form-url="{% url 'admon:group_list' %}">
+        {% csrf_token %}
+        <div class="mb-2">
+            <label for="id_name" class="form-label mb-0">Nombre del grupo:</label>
+            <input type="text" class="form-control w-100" name="name" maxlength="120" required id="id_name" value="{% if obj and obj.name %}{{ obj.name }}{% endif %}">
+            <small class="form-text text-muted">Obligatorio. Longitud máxima de 120 caracteres. Solo puede estar formado por letras, números y los caracteres @/./+/-/_.</small>
+        </div>
+
+        <h5 class="collapse-header text-gray-800 my-2">Permisos:</h5>
+
+        <div class="scrollable-container container my-2">
+            <h6 class="collapse-header text-gray-800 my-3">Permisos de Proveedor:</h6>
+            {% for perm in proveedor_perms %}
+                <div>
+                    <label for="id_permissions_{{ perm.id }}">
+                        <input type="checkbox" name="permissions" value="{{ perm.id }}" id="id_permissions_{{ perm.id }}" {% if perm.id in group_permissions %}checked{% endif %}>
+                        {% if perm.id == 45 %}Puede agregar proveedor{% elif perm.id == 46 %}Puede cambiar proveedor{% elif perm.id == 48 %}Puede ver proveedor{% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+
+            <div class="dropdown-divider-own"></div>
+
+            <h6 class="collapse-header text-gray-800 my-3">Permisos de Facturas:</h6>
+            {% for perm in facturas_perms %}
+                <div>
+                    <label for="id_permissions_{{ perm.id }}">
+                        <input type="checkbox" name="permissions" value="{{ perm.id }}" id="id_permissions_{{ perm.id }}" {% if perm.id in group_permissions %}checked{% endif %}>
+                        {% if perm.id == 49 %}Puede agregar factura{% elif perm.id == 50 %}Puede cambiar factura{% elif perm.id == 52 %}Puede ver factura{% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+
+            <div class="dropdown-divider-own"></div>
+
+            <h6 class="collapse-header text-gray-800 my-3">Permisos de Pagos:</h6>
+            {% for perm in pagos_perms %}
+                <div>
+                    <label for="id_permissions_{{ perm.id }}">
+                        <input type="checkbox" name="permissions" value="{{ perm.id }}" id="id_permissions_{{ perm.id }}" {% if perm.id in group_permissions %}checked{% endif %}>
+                        {% if perm.id == 53 %}Puede agregar pago parcial{% elif perm.id == 54 %}Puede cambiar pago parcial{% elif perm.id == 56 %}Puede ver pago parcial{% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+
+            <div class="dropdown-divider-own"></div>
+
+            <h6 class="collapse-header text-gray-800 my-3">Permisos de Caja:</h6>
+            {% for perm in caja_perms %}
+                <div>
+                    <label for="id_permissions_{{ perm.id }}">
+                        <input type="checkbox" name="permissions" value="{{ perm.id }}" id="id_permissions_{{ perm.id }}" {% if perm.id in group_permissions %}checked{% endif %}>
+                        {% if perm.id == 57 %}Puede agregar ventas{% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+
+            <div class="dropdown-divider-own"></div>
+
+            <h6 class="collapse-header text-gray-800 my-3">Permisos de Inventario:</h6>
+            {% for perm in inventario_perms %}
+                <div>
+                    <label for="id_permissions_{{ perm.id }}">
+                        <input type="checkbox" name="permissions" value="{{ perm.id }}" id="id_permissions_{{ perm.id }}" {% if perm.id in group_permissions %}checked{% endif %}>
+                        {% if perm.id == 25 %}Puede agregar categoría{% elif perm.id == 26 %}Puede cambiar categoría{% elif perm.id == 28 %}Puede ver categoría
+                        {% elif perm.id == 33 %}Puede agregar marca{% elif perm.id == 34 %}Puede cambiar marca{% elif perm.id == 36 %}Puede ver marca
+                        {% elif perm.id == 69 %}Puede agregar precio{% elif perm.id == 70 %}Puede cambiar precio{% elif perm.id == 72 %}Puede ver precio
+                        {% elif perm.id == 41 %}Puede agregar producto{% elif perm.id == 42 %}Puede cambiar producto{% elif perm.id == 44 %}Puede ver producto
+                        {% elif perm.id == 29 %}Puede agregar subcategoría{% elif perm.id == 30 %}Puede cambiar subcategoría{% elif perm.id == 32 %}Puede ver subcategoría
+                        {% elif perm.id == 37 %}Puede agregar unidad medida{% elif perm.id == 38 %}Puede cambiar unidad medida{% elif perm.id == 40 %}Puede ver unidad medida{% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="row text-center mt-4">
+            <div class="col">
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </div>
+            <div class="col">
+                <a href="{% url 'admon:group_list' %}" class="btn btn-secondary">Volver a la lista de grupos</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block js_page %}
+<script src="{% static 'base/js/pop-ups-alerts.js' %}"></script>
+<script src="{% static 'base/js/validar-form.js' %}"></script>
+{% endblock %}

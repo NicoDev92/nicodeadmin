@@ -1,0 +1,110 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<form id="categoria-form" role="form" method="POST" class="form-inline m-auto" data-form-selector="#categoria-form" data-form-url="{% url 'inv:categoria_list' %}">
+    {% csrf_token %}
+    <div class="col-xl-10 col-md-10 m-auto">
+        {% if obj %}
+        <div class="card border-left-info shadow h-100 py-2">
+        {% else %}
+        <div class="card border-left-success shadow h-100 py-2">
+        {% endif %}
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                <h3 class="{% if obj %} text-info {% else %} text-success {% endif %} Producto">
+                                    {% if obj %}Editar Categoría:{% else %}Nueva Categoría:{% endif %}
+                                </h3>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="row">
+
+                                <div class="col-12">
+                                    <div class="input-group my-2">
+                                        <input type="text" class="form-control" name="descripcion" maxlength="100"
+                                            required id="id_descripcion" placeholder="Descripcion"
+                                            value="{% if obj %}{{obj.descripcion}}{% endif %}">
+                                    </div>
+                                    <div class="col-10">
+                                        <div class="input-group my-2">
+                                            <label for="id_estado">Estado Activo:</label>
+                                            <input type="checkbox" name="estado" class="form-control" id="id_estado" 
+                                            {% if obj.estado %} checked {% endif %}>
+                                        </div>
+                                    </div>
+                                    <!-- {{form.as_p}}-->
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="row">
+                                <div class="col text-center">
+                                    <button type="submit" class="btn bg-gradient-success text-gray-100 mx-2">
+                                        <span class="fa fa-save"></span>
+                                        Guardar
+                                    </button>
+                                    <a href="{% url 'inv:categoria_list' %}" class="btn bg-gradient-warning text-gray-100 mx-2">
+                                        <span class="fa fa-undo"></span>
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</form>
+
+
+
+{% endblock %}
+
+{% block js_page %}
+<script src="{% static 'base/js/pop-ups-alerts.js' %}"></script>
+<script src="{% static 'base/js/validar-form.js' %}"></script>
+
+<!-- <script>
+    $(document).ready(function() {
+    $('#categoria-form').submit(function(event) {
+        event.preventDefault();
+
+    $.ajax({
+        type: $(this).attr('method'),
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        success: function(data) {
+            mensaje("Guardado satisfactoriamente.", false);
+
+            setTimeout(function(){
+                $('#popup').modal('hide');
+                window.location.replace("{% url 'inv:categoria_list' %}");
+              }, 3000); // 3000 milisegundos (3 segundos)
+        },
+        error: function(xhr, status, error) {
+            var errorMessage = '';
+            // Verificar si xhr.responseJSON.errors está definido y no está vacío
+            if (xhr.responseJSON.errors && Object.keys(xhr.responseJSON.errors).length > 0) {
+                // Iterar sobre las claves del objeto de errores
+                for (var field in xhr.responseJSON.errors) {
+                    // Obtener la lista de mensajes de error para el campo actual
+                    var errorList = xhr.responseJSON.errors[field];
+                    
+                    // Iterar sobre la lista de errores para el campo actual
+                    for (var i = 0; i < errorList.length; i++) {
+                        errorMessage += errorList[i] + '\n'; // Concatenar los mensajes de error
+                    }
+                }
+            } else {
+                errorMessage = 'Se produjo un error al procesar la solicitud.';
+            }
+            
+            mensaje(errorMessage, true); // Mostrar el mensaje de error
+        }
+        
+    });
+});
+});
+</script> -->
+{% endblock %}

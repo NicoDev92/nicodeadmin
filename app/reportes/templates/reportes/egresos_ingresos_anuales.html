@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load reportes_filters %}
+
+{% block page_content %}
+
+<div class="container">
+    <h3 class="title">Reportes de Ingresos y Gastos mensuales</h3>
+    {% if not chart_data %}
+    <span class="small">Para ver el repore, por favor seleccione un año:</span>
+    {% endif %}
+
+    <div class="container d-flex justify-content-end">
+        <div class="m-4">
+            <form method="get" action="{% url 'reportes:ingresos_egresos_mensuales' %}" class="form-inline">
+                <div class="form-group m-2">
+                    <label for="year" class="mr-2">Año:</label>
+                    
+                    <select id="year" name="year" class="form-control">
+                        {% for year in years %}
+                        {% if selected_year %} selected {% endif %}
+                            <option value="{{ year }}" {% if selected_year == year %} selected {% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary m-2">Filtrar</button>
+            </form>
+        </div>
+    </div>
+    
+    {% if chart_data %}
+
+        <!-- Area Chart -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Reportes de Egresos e Ingresos Anuales - año {{ selected_year }}</h6>
+            </div>
+            <div class="card-body">
+            <div class="chart-area">
+                <canvas id="myAreaChart"
+                        chart_data='{{ chart_data }}'>
+
+                </canvas>
+            </div>
+            <hr>
+                <!--Leyenda del chart-->
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            Realice una Búsqueda
+        </div>
+        {% endif %}
+</div>
+
+{% endblock %}
+
+{% block js_page %}
+<script src="{% static 'base/js/charts/charts_boundle/Chart.min.js' %}"></script>
+<script src="{% static 'base/js/charts/charts_js/chart-area-double.js' %}"></script>
+{% endblock %}

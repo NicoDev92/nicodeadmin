@@ -1,0 +1,116 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<form id="proveedor-form" method="POST" role="form" enctype="multipart/form-data" data-form-selector="#proveedor-form" data-form-url="{% url 'cmp:proveedor_list' %}">
+    {% csrf_token %}
+    <div class="col-xl-10 col-md-10 m-auto">
+    {% if obj %}
+    <div class="card border-left-info shadow h-100 py-2">
+    {% else %}
+    <div class="card border-left-success shadow h-100 py-2">
+    {% endif %}
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                    <h3 class="{% if obj %} text-info {% else %} text-success {% endif %} Producto">
+                        {% if obj %} Editar Proveedor {% else %} Nuevo Proveedor {% endif %}
+                    </h3>
+                </div>
+            <div class="dropdown-divider"></div>
+            <div class="col-12">
+
+                <div class="mb-1">
+                    <label for="id_descripcion" class="form-label mb-0">Descripción/Nombre:</label>
+                    <input type="text" class="form-control" name="descripcion" maxlength="20" required id="id_descripcion" placeholder="descripción o nombre del proveedor"
+                        value="{% if obj %}{{obj.descripcion}}{% endif %}">
+                </div>
+                <div class="mb-1">
+                    <label for="id_direccion" class="form-label mb-0">Direccion:</label>
+                    <input type="text" class="form-control" name="direccion" maxlength="50" required id="id_direccion" placeholder="Dirección del proveedor"
+                        value="{% if obj %}{{obj.direccion}}{% endif %}">
+                </div>
+                <div class="mb-1">
+                    <label for="id_cuil" class="form-label mb-0">CUIL/CUIT:</label>
+                    <input type="text" class="form-control" name="cuil" maxlength="200" required id="id_cuil" placeholder="CUIL/CUIT del proveedor, sin guiones ni símbolos"
+                        value="{% if obj %}{{obj.cuil}}{% endif %}" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <div class="mb-1">
+                    <label for="id_telefono" class="form-label mb-0">Telefono:</label>
+                    <input type="text" class="form-control" name="telefono" required id="id_telefono" placeholder="Teléfono/Celular"
+                        value="{% if obj %}{{obj.telefono}}{% endif %}" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <div class="mb-1">
+                    <label for="id_email" class="form-label mb-0">E-mail:</label>
+                    <input type="email" class="form-control" name="email" required id="id_email" placeholder="proveedor@mail.com"
+                        value="{% if obj %}{{obj.email}}{% endif %}">
+                </div>
+                <div class="col-10">
+                    <div class="mb-1">
+                        <label for="id_estado" class="form-label">Estado Activo:</label>
+                        <input type="checkbox" name="estado" class="form-control" id="id_estado" 
+                        {% if obj.estado %} checked {% endif %}>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="dropdown-divider"></div>
+
+            <div class="row">
+                <div class="col text-center">
+                    <button type="submit" class="btn bg-gradient-success text-gray-100 mx-2">
+                        <span class="fa fa-save"></span>
+                        Guardar
+                    </button>
+                    <a href="{% url 'cmp:proveedor_list' %}" class="btn bg-gradient-warning text-gray-100 mx-2">
+                        <span class="fa fa-undo"></span>
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+        </div>
+        
+    </div>
+    </div>
+</div>
+</form>
+
+
+<div class="modal fade" id="popup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content border-left-warning shadow h-100">
+        <div class="modal-header">
+          <h5 class="modal-title text-xs font-weight-bold text-warning text-uppercase" id="exampleModalLabel">Mensaje</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="h5 mb-0 font-weight-bold text-gray-800" id="message_content"></div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-comments fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-info text-gray-100" data-dismiss="modal" id="btn-modal">Aceptar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js_page %}
+<script src="{% static 'base/js/pop-ups-alerts.js' %}"></script>
+<script src="{% static 'base/js/validar-form.js' %}"></script>
+{% endblock %}
+
+
+

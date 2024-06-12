@@ -1,0 +1,131 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<form method="POST" role="form" onsubmit="return validarPrecios();" id="producto-form" enctype="multipart/form-data" data-form-selector="#producto-form" data-form-url="{% url 'inv:producto_list' %}">
+        {% csrf_token %}
+    <div class="col-xl-12 col-md-12 mb-12">
+        {% if obj %}
+        <div class="card border-left-info shadow h-100 py-2">
+        {% else %}
+        <div class="card border-left-success shadow h-100 py-2">
+        {% endif %}
+        <div class="card-body">
+            <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                    <h3 class="{% if obj %} text-info {% else %} text-success {% endif %} Producto">
+                        {% if obj %} Editar Producto {% else %} Nuevo Producto {% endif %} Producto
+                    </h3>
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="col-12">
+
+                    <div class="mb-1">
+                        <label for="id_codigo" class="form-label mb-0">Código:</label>
+                        <input type="text" class="form-control" name="codigo" maxlength="20" required id="id_codigo" placeholder="Código"
+                            value="{% if obj %}{{obj.codigo}}{% endif %}">
+                    </div>
+                    <div class="mb-1">
+                        <label for="id_codigo_barra" class="form-label mb-0">Código de barras:</label>
+                        <input type="text" class="form-control" name="codigo_barra" maxlength="50" required id="id_codigo_barra" placeholder="Código de barra"
+                            value="{% if obj %}{{obj.codigo_barra}}{% endif %}">
+                    </div>
+                    <div class="mb-1">
+                        <label for="id_descripcion" class="form-label mb-0">Descripció o Nombre:</label>
+                        <input type="text" class="form-control" name="descripcion" maxlength="200" required id="id_descripcion" placeholder="Nombre del producto"
+                            value="{% if obj %}{{obj.descripcion}}{% endif %}">
+                    </div>
+                    <div class="mb-1">
+                        <label for="id_existencia" class="form-label mb-0">Existencias:</label>
+                        <input type="number" class="form-control" name="existencia" required id="id_existencia" placeholder="Existencia"
+                            value="{% if obj %}{{obj.existencia}}{% endif %}">
+                    </div>
+                    <div class="mb-1">
+                        <label for="id_ultima_compra" class="form-label mb-0">Fecha última compra:</label>
+                        <input type="date" class="form-control" name="ultima_compra" id="id_ultima_compra" placeholder="Última compra"
+                            value="{% if ultima_compra_formatted %}{{ ultima_compra_formatted }}{% endif %}">
+                    </div>
+                    <div class="col-10">
+                        <div class="mb-1">
+                            <label for="id_estado" class="form-label">Estado Activo:</label>
+                            <input type="checkbox" name="estado" class="form-control" id="id_estado" 
+                            {% if obj.estado %} checked {% endif %}>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.subcategoria.label_tag }}
+                                {{ form.subcategoria }}
+                            </div>
+                        </div>
+                        <div class="col-md-2"></div> <!-- Espacio adicional -->
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                {{ form.marca.label_tag }}
+                                {{ form.marca }}
+                            </div>
+                        </div>
+                        <div class="col-md-2"></div> <!-- Espacio adicional -->
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="id_unidad_medida">U. Medida</label>
+                                {{ form.unidad_medida }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    </div>
+                    
+                </div>
+                <div class="dropdown-divider"></div>
+
+                <div class="row">
+                    <div class="col text-center">
+                        <button type="submit" class="btn bg-gradient-success text-gray-100 mx-2">
+                            <span class="fa fa-save"></span>
+                            Guardar
+                        </button>
+                        <a href="{% url 'inv:producto_list' %}" class="btn bg-gradient-warning text-gray-100 mx-2">
+                            <span class="fa fa-undo"></span>
+                            Cancelar
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+            </div>
+            
+        </div>
+        </div>
+    </div>
+</form>
+
+
+{% endblock %}
+
+{% block js_page %}
+<script>
+    function validarPrecios() {
+        var precioCompraInput = document.getElementById("id_precio_compra");
+        var precioVentaInput = document.getElementById("id_precio_venta");
+
+        precioCompraInput.value = precioCompraInput.value.replace(/,/g, '.');
+        precioVentaInput.value = precioVentaInput.value.replace(/,/g, '.');
+
+        var precioCompra = parseFloat(precioCompraInput.value);
+        var precioVenta = parseFloat(precioVentaInput.value);
+
+        if (isNaN(precioCompra) || isNaN(precioVenta)) {
+            mensaje("Los precios deben ser valores numéricos.");
+            return false;
+        } else {
+            return true;
+        }
+    }
+</script>
+
+<script src="{% static 'base/js/pop-ups-alerts.js' %}"></script>
+<script src="{% static 'base/js/validar-form.js' %}"></script>
+{% endblock %}

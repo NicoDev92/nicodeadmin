@@ -1,0 +1,131 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<form id="usuario-form" method="POST" class="text-gray-900" data-form-selector="#usuario-form" data-form-url="{% url 'admon:user_list' %}">
+    {% csrf_token %}
+    <div class="col-xl-10 col-md-10 m-auto">
+    {% if obj %}
+    <div class="card border-left-info shadow h-100 py-2">
+    {% else %}
+    <div class="card border-left-success shadow h-100 py-2">
+    {% endif %}
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                    <h3 class="{% if obj %} text-info {% else %} text-success {% endif %} Producto">
+                        {% if obj %} Editar Usuario {% else %} Nuevo Usuario {% endif %}
+                    </h3>
+                </div>
+            <div class="dropdown-divider"></div>
+            <div class="col-12">
+    
+        <div class="mb-2">
+            <label for="id_username" class="form-label mb-0">Nombre de usuario:</label>
+            <input type="text" class="form-control w-100" name="username" maxlength="20" required id="id_username" value="{% if obj and obj.username %}{{ obj.username }}{% endif %}">
+            <small class="form-text text-muted">Obligatorio. Longitud máxima de 150 caracteres. Solo puede estar formado por letras, números y los caracteres @/./+/-/_.</small>
+        </div>
+
+        {% if not obj %}
+        <div class="mb-2">
+            <label for="id_password1" class="form-label mb-0 text-left">Contraseña:</label>
+            <input type="password" class="form-control w-100" name="password1" required id="id_password1">
+            <small class="form-text text-muted">
+                <ul>
+                    <li>Su contraseña no puede ser similar a otros componentes de su información personal.</li>
+                    <li>Su contraseña debe contener por lo menos 8 caracteres.</li>
+                    <li>Su contraseña no puede ser una contraseña usada muy comúnmente.</li>
+                    <li>Su contraseña no puede estar formada exclusivamente por números.</li>
+                </ul>
+            </small>
+        </div>
+
+        <div class="mb-2">
+            <label for="id_password2" class="form-label mb-0 text-left">Confirmar contraseña:</label>
+            <input type="password" class="form-control w-100" name="password2" required id="id_password2">
+            <small class="form-text text-muted">Introduzca la misma contraseña nuevamente, para poder verificar la misma.</small>
+        </div>
+        {% else %}
+        <div class="mb-2">
+            <label for="id_password" class="form-label mb-0 text-left">Confirmar contraseña:</label>
+            <input type="password" class="form-control w-100" name="password" required id="id_password" value="{{ form.password1.value }}">
+            <small class="form-text text-muted">
+                <ul>
+                    <li>Su contraseña no puede ser similar a otros componentes de su información personal.</li>
+                    <li>Su contraseña debe contener por lo menos 8 caracteres.</li>
+                    <li>Su contraseña no puede ser una contraseña usada muy comúnmente.</li>
+                    <li>Su contraseña no puede estar formada exclusivamente por números.</li>
+                </ul>
+            </small>
+        </div>
+        {% endif %}
+
+        <div class="mb-2">
+            <label for="id_first_name" class="form-label mb-0 text-left">Nombre:</label>
+            <input type="text" class="form-control w-100" name="first_name" id="id_first_name" value="{% if obj and obj.first_name %} {{ obj.first_name }} {% endif %}">
+        </div>
+
+        <div class="mb-2">
+            <label for="id_last_name" class="form-label mb-0 text-left">Apellido:</label>
+            <input type="text" class="form-control w-100" name="last_name" id="id_last_name" value="{% if obj and obj.last_name %} {{ obj.last_name }} {% endif %}">
+        </div>
+
+        <div class="mb-2">
+            <label for="id_email" class="form-label mb-0 text-left">Correo electrónico:</label>
+            <input type="email" class="form-control w-100" name="email" id="id_email" value="{% if obj and obj.email %} {{ obj.email }} {% endif %}">
+        </div>
+        
+        <div class="mb-2">
+            <label for="id_is_staff" class="form-label mb-0 text-left">Es staff:</label>
+            <input type="checkbox" name="is_staff" id="id_is_staff" {% if obj and obj.is_staff %}checked{% endif %}>
+            <small class="form-text text-muted">Indica si el usuario puede ingresar a este sitio de administración.</small>
+        </div>
+
+        <div class="mb-2">
+            <label for="id_is_superuser" class="form-label mb-0 text-left">Es superusuario:</label>
+            <input type="checkbox" name="is_superuser" id="id_is_superuser" {% if obj and obj.is_superuser %}checked{% endif %}>
+            <small class="form-text text-muted">Indica que este usuario posee todos los permisos sin que sea necesario asignarle los mismos en forma explícita.</small>
+        </div>
+
+
+        <div class="mb-2">
+            <label for="id_groups" class="form-label mb-0 text-left">Grupos:</label>
+            <small class="form-text text-muted">Grupos a los cuales pertenece este usuario. Un usuario obtiene todos los permisos otorgados a cada uno de los grupos a los cuales pertenece.</small>
+            {% for checkbox in form.groups %}
+                <div class="form-check">
+                    {{ checkbox }}
+                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="row">
+            <div class="col text-center">
+                <button type="submit" class="btn bg-gradient-success text-gray-100 mx-2">
+                    <span class="fa fa-save"></span>
+                    Guardar
+                </button>
+                <a href="{% url 'admon:user_list' %}" class="btn bg-gradient-warning text-gray-100 mx-2">
+                    <span class="fa fa-undo"></span>
+                    Cancelar
+                </a>
+            </div>
+        </div>
+        
+    </div>
+    </div>
+    
+</div>
+</div>
+</div>
+</form>
+{% endblock %}
+
+{% block js_page %}
+<script src="{% static 'base/js/pop-ups-alerts.js' %}"></script>
+<script src="{% static 'base/js/validar-form.js' %}"></script>
+{% endblock %}

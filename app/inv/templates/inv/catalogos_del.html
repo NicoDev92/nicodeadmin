@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+
+{% block page_content %}
+<form method="POST" class="form-inline">
+    {% csrf_token %}
+    <div class="col-xl-8 col-md-8 m-auto">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2 text-center">
+                    <div class="col-auto my-1">
+                    <i class="far fa-question-circle fa-2x text-gray-300"></i>
+                    </div>
+                    <div class="font-weight-bold text-warning text-uppercase my-2">¿Eliminar {{obj.descripcion}}?</div>
+                <button type="submit" class="btn btn-danger m-2"> <i class="far fa-trash-alt"></i> Si, Eliminar</button>
+                <!-- <a href="{% url 'inv:categoria_list' %}" 
+                    class="btn btn-info m-2">
+                    <span class="fa fa-undo"></span>
+                    Cancelar
+                </a> -->
+                <a href="{{ request.META.HTTP_REFERER }}" 
+                    class="btn btn-info m-2">
+                    <span class="fa fa-undo"></span>
+                    Cancelar
+                </a>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+</form>
+{% endblock %}
+
+{% block js_page %}
+{% endblock %}
